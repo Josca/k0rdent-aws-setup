@@ -1,0 +1,44 @@
+name: Build and Push k0rdent-aws-setup Image
+
+on:
+  push:
+    branches:
+      - '**'  # Trigger on any branch
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set image vars
+        id: vars
+        run: |
+          owner="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
+          echo "owner=$owner" >> $GITHUB_OUTPUT
+          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
+            echo "tag=0.0.1" >> $GITHUB_OUTPUT
+          else
+            echo "tag=dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build image
+        run: |
+          docker build -t ghcr.io/${{ steps.vars.outputs.owner }}/k0rdent-aws-setup:${{ steps.vars.outputs.tag }} .
+
+      - name: Push image
+        run: |
+          docker push ghcr.io/${{ steps.vars.outputs.owner }}/k0rdent-aws-setup:${{ steps.vars.outputs.tag }}
