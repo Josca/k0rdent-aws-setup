@@ -1,0 +1,5 @@
+# store script to export AWS_.. env vars
+set_envs.sh
+
+# generated file soting k0rdent IAM user secrets
+set_k0rdent_user_secrets.sh
