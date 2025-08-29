@@ -15,8 +15,7 @@ ROLE = "control-plane.cluster-api-provider-aws.sigs.k8s.io"
 def get_aws_region() -> str:
     aws_region = os.getenv("AWS_REGION")
     if aws_region == None:
-        print(f"AWS_REGION environment variable not found, please set!")
-        sys.exit(1)
+        raise Exception(f"AWS_REGION environment variable not found, please set!")
     return aws_region
 
 
@@ -73,13 +72,13 @@ def detect_stack_region(aws_region: str) -> str:
 
 def ensure_stack(aws_region: str):
     if stack_exists(aws_region):
-        print(f"Stack '{STAK_NAME}' already exists.")
-        return
-    if role_exists():
-        print(f"Role '{ROLE}' found!")
+        print(f"Stack '{STAK_NAME}' already exists. Trying to update...")
+    elif role_exists():
+        print(f"Error: Stack '{STAK_NAME}' not found in used AWS region ({aws_region}), "+
+              f"but stack role '{ROLE}' found! There is probably the stack created in a different region. "+
+              "Trying to locate existing CloudFormation stack...")
         detected_region = detect_stack_region(aws_region)
-        print(f"Conflicting config (Stack) found in '{detected_region}'. Please, use this region, or remove the stack!")
-        sys.exit(1)
+        raise Exception(f"Conflicting stack ({STAK_NAME}) found in '{detected_region}'. Please, use this region, or remove the existing stack!")
     subprocess.run(["clusterawsadm", "bootstrap", "iam", "create-cloudformation-stack", "--region", aws_region], check=True)
 
 
@@ -133,9 +132,13 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-aws_region = get_aws_region()
-ensure_stack(aws_region)
-user_arn = ensure_user(args.username)
-policies = get_policies(aws_region)
-attach_policies(policies, args.username)
-create_access_key(args.username, args.output_secrets_file)
+try:
+    aws_region = get_aws_region()
+    ensure_stack(aws_region)
+    user_arn = ensure_user(args.username)
+    policies = get_policies(aws_region)
+    attach_policies(policies, args.username)
+    create_access_key(args.username, args.output_secrets_file)
+except Exception as e:
+    print("ERROR:", e)
+    sys.exit(1)
