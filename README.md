@@ -13,7 +13,7 @@ export AWS_SESSION_TOKEN="..."
 
 Run main setup script:
 ~~~bash
-git clone git@github.com:Josca/k0rdent-aws-setup.git
+git clone https://github.com/Josca/k0rdent-aws-setup.git
 cd k0rdent-aws-setup
 ./setup.sh k0rdentUser
 ~~~
