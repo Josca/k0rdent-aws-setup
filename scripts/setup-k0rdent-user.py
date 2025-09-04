@@ -19,7 +19,7 @@ def get_aws_region() -> str:
     return aws_region
 
 
-def user_exits(username: str) -> bool:
+def user_exists(username: str) -> bool:
     iam = boto3.client("iam")
     try:
         iam.get_user(UserName=username)
@@ -30,10 +30,13 @@ def user_exits(username: str) -> bool:
     return True
 
 
-def ensure_user(username: str):
-    if user_exits(username=username):
-        print(f"IAM user '{username}' already exists.")
-        return
+def check_user_exists(username: str):
+    if user_exists(username=username):
+        print(f"User '{username}' already exists on this amazon account, please use a different name.")
+        sys.exit(1)
+
+
+def create_user(username: str):
     iam = boto3.client("iam")
     iam.create_user(UserName=username)
     print(f"IAM user '{username}' created successfully.")
@@ -133,9 +136,10 @@ parser.add_argument(
 args = parser.parse_args()
 
 try:
+    check_user_exists(args.username)
     aws_region = get_aws_region()
     ensure_stack(aws_region)
-    user_arn = ensure_user(args.username)
+    user_arn = create_user(args.username)
     policies = get_policies(aws_region)
     attach_policies(policies, args.username)
     create_access_key(args.username, args.output_secrets_file)

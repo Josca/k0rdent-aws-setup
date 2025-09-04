@@ -40,5 +40,6 @@ jobs:
           docker build -t ghcr.io/${{ steps.vars.outputs.owner }}/k0rdent-aws-setup:${{ steps.vars.outputs.tag }} .
 
       - name: Push image
+        if: github.ref != 'refs/heads/main'
         run: |
           docker push ghcr.io/${{ steps.vars.outputs.owner }}/k0rdent-aws-setup:${{ steps.vars.outputs.tag }}
