@@ -78,7 +78,7 @@ def ensure_stack(aws_region: str):
               f"but stack role '{ROLE}' found! There is probably the stack created in a different region. "+
               "Trying to locate existing CloudFormation stack...")
         detected_region = detect_stack_region(aws_region)
-        raise Exception(f"Conflicting stack ({STAK_NAME}) found in '{detected_region}'. Please, use this region, or remove the existing stack!")
+        raise Exception(f"Conflicting stack ({STAK_NAME}) found in '{detected_region}'. Please, use this region.")
     subprocess.run(["clusterawsadm", "bootstrap", "iam", "create-cloudformation-stack", "--region", aws_region], check=True)
 
 
