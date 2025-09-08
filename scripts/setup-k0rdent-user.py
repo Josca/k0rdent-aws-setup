@@ -11,6 +11,20 @@ import os
 STAK_NAME = "cluster-api-provider-aws-sigs-k8s-io"
 ROLE = "control-plane.cluster-api-provider-aws.sigs.k8s.io"
 
+help_msg = """
+# Please set the following environment variables before using the command:
+export AWS_REGION="..." # Any prefered AWS region to create k0rdent related IAM permissions, e.g. us-west-1
+export AWS_ACCESS_KEY_ID="..."
+export AWS_SECRET_ACCESS_KEY="..."
+export AWS_SESSION_TOKEN="..."
+"""
+
+def check_env_vars(vars: list):
+    for varname in vars:
+        val = os.getenv(varname)
+        if val in [None, ""]:
+            raise Exception(f"Required '{varname}' environment variable not found, please set!\n{help_msg}")
+
 
 def get_aws_region() -> str:
     aws_region = os.getenv("AWS_REGION")
@@ -136,6 +150,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 try:
+    check_env_vars(['AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_SESSION_TOKEN'])
     check_user_exists(args.username)
     aws_region = get_aws_region()
     ensure_stack(aws_region)
