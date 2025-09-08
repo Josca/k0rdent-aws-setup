@@ -1,5 +1,11 @@
 #!/bin/bash
-set -euo pipefail
+set -eo pipefail
+
+if [ -z "$1" ]; then
+  echo "Error: Missing required argument."
+  echo "Usage: $0 <k0rdent-user-name>"
+  exit 1
+fi
 
 secrets_filename="set_k0rdent_user_secrets.sh"
 
