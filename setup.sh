@@ -18,9 +18,9 @@ docker run --rm -it \
 source ./scripts/$secrets_filename
 
 # Create k0rdent Kubernetes AWS credentials resources
-user_lower=$(echo $1 | tr '[:upper:]' '[:lower:]')
-helm upgrade --install aws-cred-$user_lower oci://ghcr.io/k0rdent/catalog/charts/aws-credential \
-    --version 0.0.1 \
+helm upgrade --install aws-credential oci://ghcr.io/k0rdent/catalog/charts/aws-credential \
+    --version 1.0.0 \
     -n kcm-system
-kubectl patch secret aws-cred-$user_lower-secret -n kcm-system -p='{"stringData":{"AccessKeyID":"'$AWS_ACCESS_KEY_ID_USER'"}}'
-kubectl patch secret aws-cred-$user_lower-secret -n kcm-system -p='{"stringData":{"SecretAccessKey":"'$AWS_SECRET_ACCESS_KEY_USER'"}}'
+
+kubectl patch secret aws-credential-secret -n kcm-system -p='{"stringData":{"AccessKeyID":"'$AWS_ACCESS_KEY_ID_USER'"}}'
+kubectl patch secret aws-credential-secret -n kcm-system -p='{"stringData":{"SecretAccessKey":"'$AWS_SECRET_ACCESS_KEY_USER'"}}'
